@@ -9,6 +9,7 @@ services:
       - BROWSER=${BROWSER:-1}  # Enable FalkorDB Browser UI (set to 0 to disable)
     volumes:
       - falkordb_data:/data
+    command: redis-server --stop-writes-on-bgsave-error no
     healthcheck:
       test: ["CMD", "redis-cli", "-p", "6379", "ping"]
       interval: 10s
