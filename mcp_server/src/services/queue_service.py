@@ -78,6 +78,16 @@ class QueueService:
         finally:
             self._queue_workers[group_id] = False
             logger.info(f'Stopped episode queue worker for group_id: {group_id}')
+            # If episodes are still queued (worker crashed unexpectedly), restart immediately
+            if (
+                group_id in self._episode_queues
+                and not self._episode_queues[group_id].empty()
+            ):
+                logger.warning(
+                    f'Restarting queue worker for group_id {group_id}: '
+                    f'{self._episode_queues[group_id].qsize()} episode(s) still queued'
+                )
+                asyncio.create_task(self._process_episode_queue(group_id))
 
     def get_queue_size(self, group_id: str) -> int:
         """Get the current queue size for a group_id."""
